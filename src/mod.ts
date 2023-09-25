@@ -1,5 +1,9 @@
-import { Http2Mqtt } from './http-to-mqtt.js'
+import { EventPublisher, EventPublisherConfig } from './event-publisher.js'
+import { BotController, BotControllerConfig } from './bot-controller.js'
 
 export {
-  Http2Mqtt,
+  EventPublisher,
+  type EventPublisherConfig,
+  BotController,
+  type BotControllerConfig,
 }

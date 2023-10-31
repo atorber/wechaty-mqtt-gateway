@@ -1,12 +1,12 @@
 /* eslint-disable sort-keys */
 import { FileBox } from 'file-box'
-import { MqttClient } from 'mqtt'
+import type { MqttClient } from 'mqtt'
 import { v4 } from 'uuid'
-import {
-  Contact, log, Message, ScanStatus, Wechaty, types, MiniProgram, UrlLink, Room,
+import type {
+  Wechaty, types, MiniProgram, UrlLink, Room,
 } from 'wechaty'
 
-function propertyMessage (name, info) {
+function propertyMessage (name: string, info: { id: string; gender: string | types.ContactGender.Male | types.ContactGender.Female; name: string; alias: string; avatar: string }[] | Room[]) {
   let message:any = {
     reqId: v4(),
     method: 'thing.property.post',
@@ -20,7 +20,7 @@ function propertyMessage (name, info) {
   return message
 }
 
-function eventMessage (name, info) {
+function eventMessage (name: string, info: string) {
   let message:any = {
     reqId: v4(),
     method: 'thing.event.post',
@@ -43,7 +43,7 @@ export class ChatDevice {
     this.client = client
   }
 
-  async onMessage (topic, message) {
+  async onMessage (_topic: any, message: any) {
     // const content = JSON.parse(message.toString())
     message = JSON.parse(message)
     const name = message.name
@@ -95,20 +95,20 @@ export class ChatDevice {
 
   async getAllContact () {
     const contactList = await this.bot.Contact.findAll()
-    const friends = []
+    const friends:any = []
     for (const i in contactList) {
       const contact = contactList[i]
       let avatar = ''
       try {
-        avatar = JSON.parse(JSON.stringify(await contact.avatar())).url
+        avatar = JSON.parse(JSON.stringify(await contact?.avatar())).url
       } catch (err) {
 
       }
       const contactInfo = {
-        id: contact.id,
-        gender: contact.gender() || '',
-        name: contact.name() || '',
-        alias: await contact.alias() || '',
+        id: contact?.id,
+        gender: contact?.gender() || '',
+        name: contact?.name() || '',
+        alias: await contact?.alias() || '',
         avatar,
       }
       friends.push(contactInfo)
@@ -121,18 +121,18 @@ export class ChatDevice {
   async getAllRoom () {
     const roomList = await this.bot.Room.findAll()
     for (const i in roomList) {
-      const room = roomList[i]
+      const room:Room|undefined = roomList[i]
       const roomInfo:any = {}
-      roomInfo.id = room.id
+      roomInfo.id = room?.id
 
-      const avatar = await room.avatar()
+      const avatar = await room?.avatar()
       roomInfo.avatar = JSON.parse(JSON.stringify(avatar)).url
 
-      roomInfo.ownerId = room.owner().id
+      roomInfo.ownerId = room?.owner()?.id
       try {
-        roomInfo.topic = await room.topic()
+        roomInfo.topic = await room?.topic()
       } catch (err) {
-        roomInfo.topic = room.id
+        roomInfo.topic = room?.id
       }
       //   let memberAlias = ''
       //   try {
@@ -146,7 +146,7 @@ export class ChatDevice {
     return msg
   }
 
-  async send (params) {
+  async send (params: { messageType: string; messagePayload: string | MiniProgram | UrlLink | string[]; toContacts: any }) {
 
     let msg:any = ''
     if (params.messageType === 'Text') {
@@ -183,7 +183,7 @@ export class ChatDevice {
                 "messagePayload":"tyutluyc"
             }
         } */
-      const contactCard = await this.bot.Contact.find({ id: params.messagePayload })
+      const contactCard = await this.bot.Contact.find({ id: (params.messagePayload as string) })
       if (!contactCard) {
         return {
           msg: '无此联系人',
@@ -208,10 +208,10 @@ export class ChatDevice {
               "messagePayload":"/tmp/text.txt"
           }
       } */
-      if (params.messagePayload.indexOf('http') !== -1 || params.messagePayload.indexOf('https') !== -1) {
-        msg = FileBox.fromUrl(params.messagePayload)
+      if ((params.messagePayload as string).indexOf('http') !== -1 || (params.messagePayload as string).indexOf('https') !== -1) {
+        msg = FileBox.fromUrl(params.messagePayload as string)
       } else {
-        msg = FileBox.fromFile(params.messagePayload)
+        msg = FileBox.fromFile(params.messagePayload as string)
       }
 
     } else if (params.messageType === 'Image') {
@@ -231,10 +231,10 @@ export class ChatDevice {
           }
       } */
       // msg = FileBox.fromUrl(params.messagePayload)
-      if (params.messagePayload.indexOf('http') !== -1 || params.messagePayload.indexOf('https') !== -1) {
-        msg = FileBox.fromUrl(params.messagePayload)
+      if ((params.messagePayload as string).indexOf('http') !== -1 || (params.messagePayload as string).indexOf('https') !== -1) {
+        msg = FileBox.fromUrl(params.messagePayload as string)
       } else {
-        msg = FileBox.fromFile(params.messagePayload)
+        msg = FileBox.fromFile(params.messagePayload as string)
       }
 
     } else if (params.messageType === 'Url') {
@@ -319,19 +319,19 @@ export class ChatDevice {
 
   }
 
-  async sendAt (params) {
+  async sendAt (params: { toContacts: any; room: any; messagePayload: TemplateStringsArray }) {
     const atUserIdList = params.toContacts
-    const room = await this.bot.Room.find({ id: params.room })
+    const room:Room|undefined = await this.bot.Room.find({ id: params.room })
     const atUserList = []
     for (const userId of atUserIdList) {
       const curContact = await this.bot.Contact.find({ id:userId })
       atUserList.push(curContact)
     }
-    await room.say(params.messagePayload, ...atUserList)
+    await room?.say(params.messagePayload, ...atUserList)
   }
 
-  async createRoom (params) {
-    const contactList = []
+  async createRoom (params: { contactList: { [x: string]: any }; topic: string | undefined }) {
+    const contactList:any = []
     for (const i in params.contactList) {
       const c = await this.bot.Contact.find({ name: params.contactList[i] })
       contactList.push(c)
@@ -345,9 +345,9 @@ export class ChatDevice {
 
   async getQrcod (params:any) {
     const roomId = params.roomId
-    const room:Room = await this.bot.Room.find({ id: roomId })
-    const qr = await room.qrCode()
-    const msg = eventMessage('qrcode', qr)
+    const room:Room|undefined = await this.bot.Room.find({ id: roomId })
+    const qr = await room?.qrCode()
+    const msg = eventMessage('qrcode', qr || '')
     return msg
   }
 

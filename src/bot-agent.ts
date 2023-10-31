@@ -316,7 +316,7 @@ export class ChatDevice {
         }
       }
     }
-
+    return null
   }
 
   async sendAt (params: { toContacts: any; room: any; messagePayload: TemplateStringsArray }) {

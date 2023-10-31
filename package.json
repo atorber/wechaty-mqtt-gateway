@@ -1,6 +1,6 @@
 {
   "name": "mqtt-link",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Using HTTP requests to publish mqtt messages",
   "type": "module",
   "exports": {

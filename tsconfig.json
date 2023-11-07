@@ -8,7 +8,8 @@
     "node_modules/",
     "dist/",
     "tests/fixtures/",
-    "tests/fixtures/smoke-testing.ts",
+    ".eslintrc.cjs",
+    "tests/fixtures/smoke-testing.ts"
   ],
   "include": [
     "bin/*.ts",
@@ -16,7 +17,6 @@
     "examples/**/*.ts",
     "scripts/**/*.ts",
     "src/**/*.ts",
-    ".eslintrc.cjs",
-    "tests/**/*.spec.ts",
-  ],
+    "tests/**/*.spec.ts"
+  ]
 }

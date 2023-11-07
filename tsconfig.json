@@ -16,6 +16,7 @@
     "examples/**/*.ts",
     "scripts/**/*.ts",
     "src/**/*.ts",
+    ".eslintrc.cjs",
     "tests/**/*.spec.ts",
   ],
 }
